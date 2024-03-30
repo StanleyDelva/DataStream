@@ -3,46 +3,45 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-from redfin_scraper import RedfinScraper
+from cdp_scrapers.legistar_utils import get_legistar_events_for_timespan
 
 
 default_args = {"owner": "airscholar", "start_date": datetime(2024, 3, 29, 10, 00)}
 
-# Get path of current directory, then get csv file from sibling directory
-path = os.path.realpath(__file__)
-dir = os.path.dirname(path)
 
-dir = dir.replace("dags", "zip_codes")
-
-# changes the current directory to
-# zip_codes folder
-os.chdir(dir)
-
-zip_code_database_path = os.path.join(dir, "zip_code_database.csv")
+# necessary zip codes for ATL area
+zip_codes = [str(item) for item in range (30301, 30340)]
 
 
-def stream_data():
+def get_data():
     # code to stream data from API
     import json
 
-    scraper = RedfinScraper()
+    # Get legistar events from beginning of month to current date
+    fulton_legistar_events = get_legistar_events_for_timespan(
+    client="fulton",
+    begin=datetime(2024, datetime.now().month, 1),
+    end=datetime(2024, datetime.now().month, datetime.now().day),
+    )
 
-    scraper.setup(zip_database_path=zip_code_database_path, multiprocessing=False)
+    fulton_events = json.dumps(fulton_legistar_events, indent=2)
 
-    res = scraper.scrape(sold=False, sale_period=None, lat_tuner=1.5, lon_tuner=1.5)
+    return fulton_events
 
-    print(res)
+def stream_data():
+    print(get_data())
 
 
 with DAG(
     "user_automation",
     default_args=default_args,
-    schedule_interval="@daily",
+    schedule="@daily",
     catchup=False,
 ) as dag:
 
     streaming_task = PythonOperator(
-        taskid="stream_data_from_api", python_callable=stream_data
+        task_id="stream_data_from_api", 
+        python_callable=stream_data
     )
 
 

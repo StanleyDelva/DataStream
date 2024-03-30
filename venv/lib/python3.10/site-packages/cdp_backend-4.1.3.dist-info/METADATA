@@ -1,0 +1,154 @@
+Metadata-Version: 2.1
+Name: cdp-backend
+Version: 4.1.3
+Summary: Data storage utilities and processing pipelines used by CDP instances.
+Author: To Huynh, Isaac Na, Council Data Project Contributors
+Author-email: Eva Maxfield Brown <evamaxfieldbrown@gmail.com>
+License: MIT License
+Project-URL: Homepage, https://github.com/CouncilDataProject/cdp-backend
+Project-URL: Bug Tracker, https://github.com/CouncilDataProject/cdp-backend/issues
+Project-URL: Documentation, https://CouncilDataProject.github.io/cdp-backend
+Project-URL: User Support, https://github.com/CouncilDataProject/cdp-backend/issues
+Keywords: civic technology,open government
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: aiohttp >=3.8.1
+Requires-Dist: backoff >=2.2
+Requires-Dist: dataclasses-json >=0.5
+Requires-Dist: fireo ~=1.5
+Requires-Dist: fsspec
+Requires-Dist: gcsfs >=2022.7.1
+Requires-Dist: google-cloud-firestore
+Requires-Dist: PyYAML >=5.4.1
+Requires-Dist: requests >=2.26.0
+Provides-Extra: dev
+Requires-Dist: bokeh ; extra == 'dev'
+Requires-Dist: ipython >=8.4.0 ; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: m2r2 >=0.2.7 ; extra == 'docs'
+Requires-Dist: Sphinx >=4.0.0 ; extra == 'docs'
+Requires-Dist: furo >=2022.4.7 ; extra == 'docs'
+Requires-Dist: numpydoc ; extra == 'docs'
+Requires-Dist: sphinx-copybutton ; extra == 'docs'
+Requires-Dist: docutils <0.19,>=0.18 ; extra == 'docs'
+Provides-Extra: functions
+Requires-Dist: flask ==2.1.0 ; extra == 'functions'
+Requires-Dist: functions-framework ==3.1.0 ; extra == 'functions'
+Requires-Dist: ffmpeg-python ==0.2.0 ; extra == 'functions'
+Provides-Extra: lint
+Requires-Dist: black >=22.3.0 ; extra == 'lint'
+Requires-Dist: check-manifest >=0.48 ; extra == 'lint'
+Requires-Dist: ruff >=0.0.216 ; extra == 'lint'
+Requires-Dist: mypy >=0.790 ; extra == 'lint'
+Requires-Dist: pre-commit >=2.20.0 ; extra == 'lint'
+Requires-Dist: types-requests >=2.28.5 ; extra == 'lint'
+Requires-Dist: types-pytz >=2022.1.2 ; extra == 'lint'
+Requires-Dist: types-PyYAML >=6.0.11 ; extra == 'lint'
+Provides-Extra: pipeline
+Requires-Dist: dask[distributed] >=2021.7.0 ; extra == 'pipeline'
+Requires-Dist: faster-whisper ==0.3.0 ; extra == 'pipeline'
+Requires-Dist: ffmpeg-python >=0.2.0 ; extra == 'pipeline'
+Requires-Dist: graphviz >=0.16 ; extra == 'pipeline'
+Requires-Dist: imageio >=2.18 ; extra == 'pipeline'
+Requires-Dist: imageio-ffmpeg >=0.4 ; extra == 'pipeline'
+Requires-Dist: m3u8-To-MP4 ==0.1.10 ; extra == 'pipeline'
+Requires-Dist: nltk >=3.6 ; extra == 'pipeline'
+Requires-Dist: numpy >=1.0 ; extra == 'pipeline'
+Requires-Dist: pandas >=1.2 ; extra == 'pipeline'
+Requires-Dist: prefect <2,>=1.2 ; extra == 'pipeline'
+Requires-Dist: pyarrow >=8.0 ; extra == 'pipeline'
+Requires-Dist: pydub >=0.25.1 ; extra == 'pipeline'
+Requires-Dist: pypdf >=2.0 ; extra == 'pipeline'
+Requires-Dist: rapidfuzz >=2.0 ; extra == 'pipeline'
+Requires-Dist: spacy >=3.4 ; extra == 'pipeline'
+Requires-Dist: tika ==2.6.0 ; extra == 'pipeline'
+Requires-Dist: torch <2,>=1.10 ; extra == 'pipeline'
+Requires-Dist: tqdm >=4.62 ; extra == 'pipeline'
+Requires-Dist: transformers >=4.16 ; extra == 'pipeline'
+Requires-Dist: vimeo-downloader >=0.4 ; extra == 'pipeline'
+Requires-Dist: yt-dlp >=2023.2.17 ; extra == 'pipeline'
+Provides-Extra: test
+Requires-Dist: coverage >=5.1 ; extra == 'test'
+Requires-Dist: pytest >=5.4.3 ; extra == 'test'
+Requires-Dist: pytest-cov >=2.9.0 ; extra == 'test'
+Requires-Dist: pytest-raises >=0.11 ; extra == 'test'
+Requires-Dist: networkx >=2.5 ; extra == 'test'
+Requires-Dist: pydot >=1.4 ; extra == 'test'
+Requires-Dist: requests-mock >=1.10.0 ; extra == 'test'
+
+# cdp-backend
+
+[![Build Status](https://github.com/CouncilDataProject/cdp-backend/workflows/CI/badge.svg)](https://github.com/CouncilDataProject/cdp-backend/actions)
+[![Documentation](https://github.com/CouncilDataProject/cdp-backend/workflows/Documentation/badge.svg)](https://CouncilDataProject.github.io/cdp-backend)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.03904/status.svg)](https://doi.org/10.21105/joss.03904)
+
+Data storage utilities and processing pipelines used by CDP instances.
+
+---
+
+## Council Data Project
+
+Council Data Project is an open-source project dedicated to providing journalists, activists, researchers, and all members of each community we serve with the tools they need to stay informed and hold their Council Members accountable.
+
+For more information about Council Data Project, please visit [our website](https://councildataproject.org/).
+
+## About
+
+`cdp-backend` is used to maintain the database models, infrastructure stack, and all pipelines for CDP Instance web applications.
+
+The central goal is to create a single library that manages the whole backend of any CDP Instance.
+
+## Installation
+
+**Stable Release (with just data access dependencies):** `pip install cdp-backend`<br/>
+**Stable Release (with full pipeline dependencies):** `pip install cdp-backend[pipeline]`
+
+**Development Head:** `pip install git+https://github.com/CouncilDataProject/cdp-backend.git`
+
+**Dev Installation:** For devs, please ensure that you have [dot / graphviz](https://graphviz.org/download/) installed before working with tests and auto-documentation generation.
+
+## Infrastructure
+
+Please see [dev-infrastructure](./dev-infrastructure) for defaults on dev deployments.
+
+## Documentation
+
+For full package documentation please visit [councildataproject.org/cdp-backend](https://councildataproject.org/cdp-backend).
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to development of this repository.
+
+## Citation
+
+If you have found CDP software, data, or ideas useful in your own work, please consider citing us:
+
+Brown et al., (2021). Council Data Project: Software for Municipal Data Collection, Analysis, and Publication. Journal of Open Source Software, 6(68), 3904, https://doi.org/10.21105/joss.03904
+
+```bibtex
+@article{Brown2021,
+  doi = {10.21105/joss.03904},
+  url = {https://doi.org/10.21105/joss.03904},
+  year = {2021},
+  publisher = {The Open Journal},
+  volume = {6},
+  number = {68},
+  pages = {3904},
+  author = {Eva Maxfield Brown and To Huynh and Isaac Na and Brian Ledbetter and Hawk Ticehurst and Sarah Liu and Emily Gilles and Katlyn M. f. Greene and Sung Cho and Shak Ragoler and Nicholas Weber},
+  title = {{Council Data Project: Software for Municipal Data Collection, Analysis, and Publication}},
+  journal = {Journal of Open Source Software}
+}
+```
+
+## License
+
+**MIT License**

@@ -1,0 +1,14 @@
+[console_scripts]
+add_content_hash_to_sessions = cdp_backend.bin.add_content_hash_to_sessions:main
+clean_cdp_database = cdp_backend.bin.clean_cdp_database:main
+clean_cdp_filestore = cdp_backend.bin.clean_cdp_filestore:main
+create_cdp_database_uml = cdp_backend.bin.create_cdp_database_uml:main
+create_cdp_ingestion_models_doc = cdp_backend.bin.create_cdp_ingestion_models_doc:main
+create_cdp_transcript_model_doc = cdp_backend.bin.create_cdp_transcript_model_doc:main
+get_cdp_infrastructure_stack = cdp_backend.bin.get_cdp_infrastructure_stack:main
+process_cdp_event_index_chunk = cdp_backend.bin.process_cdp_event_index_chunk:main
+process_special_event = cdp_backend.bin.process_special_event:main
+run_cdp_event_gather = cdp_backend.bin.run_cdp_event_gather:main
+run_cdp_event_index_generation = cdp_backend.bin.run_cdp_event_index_generation:main
+search_cdp_events = cdp_backend.bin.search_cdp_events:main
+store_cdp_metadata_document = cdp_backend.bin.store_cdp_metadata_document:main
