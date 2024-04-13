@@ -1,0 +1,2 @@
+[console_scripts]
+civic-scraper = civic_scraper.cli:cli
