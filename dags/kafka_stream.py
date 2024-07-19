@@ -33,18 +33,40 @@ def get_data():
     #return fulton_event
     return fulton_legistar_events[0]
 
+def format_data(res):
+    data = {}
+    data['event_id'] = res['event_id']
+    data['event_date'] = res['event_date']
+    data['event_time'] = res['event_time']
+    data['EventInSiteURL'] = res['EventInSiteURL']
+    data['event_data'] = res
+    
 def stream_data():
     import json
     from kafka import KafkaProducer
+    import time
+    import logging
 
-    res = get_data()
 
     producer = KafkaProducer(bootstrap_servers=['broker:9092'], max_block_ms=6000, api_version=(1, 0, 0))
-    producer.send('board_of_commission_events', json.dumps(res).encode('utf-8')) 
+    curr_time = time.time()
+
+    while True:
+        if time.time() > curr_time + 300: # 3 minutes
+            break
+        try:
+            res = get_data()
+            res = format_data(res)
+
+            producer.send('board_of_commission_events', json.dumps(res).encode('utf-8')) 
+        except Exception as e:
+            logging.error(f"An error occurred: {e}")
+            continue
+            
 
 
 with DAG(
-    "user_automation",
+    "BoC_automation",
     default_args=default_args,
     schedule="@daily",
     catchup=False,

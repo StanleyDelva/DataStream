@@ -111,7 +111,7 @@ services:
     platform: linux/amd64
     image: apache/airflow:2.6.0-python3.9
     command: webserver
-    entrypoint: /opt/airflow/script/entrypoint.sh
+    entrypoint: [ '/opt/airflow/script/entrypoint.sh' ]
     depends_on:
       - postgres
     environment:
@@ -119,14 +119,14 @@ services:
       - EXECUTOR=Sequential
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       - AIRFLOW_WEBSERVER_SECRET_KEY=this_is_a_very_secured_key
-      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG="True"
+      #- AIRFLOW__WEBSERVER__EXPOSE_CONFIG="True"
     logging:
       options:
         max-size: 10m
         max-file: "3"
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./script/entrypoint.sh:/opt/airflow/scripts/entrypoint.sh
+      - ./script/entrypoint.sh:/opt/airflow/script/entrypoint.sh
       - ./requirements.txt:/opt/airflow/requirements.txt
     ports:
       - "8080:8080"
@@ -137,7 +137,7 @@ services:
           "[ -f /opt/airflow/airflow-webserver.pid ]"
         ]
       interval: 30s
-      timeout: 30s
+      timeout: 100s
       retries: 3
     networks:
       - confluent
