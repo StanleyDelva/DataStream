@@ -104,9 +104,10 @@ services:
       retries: 5
 
   webserver:
+    platform: linux/amd64
     image: apache/airflow:2.6.0-python3.9
     command: webserver
-    entrypoint: ['/opt/airflow/script/entrypoint.sh']
+    entrypoint: /opt/airflow/script/entrypoint.sh
     depends_on:
       - postgres
     environment:
@@ -114,6 +115,7 @@ services:
       - EXECUTOR=Sequential
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       - AIRFLOW_WEBSERVER_SECRET_KEY=this_is_a_very_secured_key
+      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG="True"
     logging:
       options:
         max-size: 10m
