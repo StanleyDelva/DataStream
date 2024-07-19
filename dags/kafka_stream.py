@@ -39,7 +39,7 @@ def stream_data():
 
     res = get_data()
 
-    producer = KafkaProducer(bootstrap_servers=['broker:9092'], max_block_ms=5000)
+    producer = KafkaProducer(bootstrap_servers=['broker:9092'], max_block_ms=6000, api_version=(1, 0, 0))
     producer.send('board_of_commission_events', json.dumps(res).encode('utf-8')) 
 
 
