@@ -35,12 +35,12 @@ def get_data():
 
 def format_data(res):
     data = {}
-    data['event_id'] = res['event_id']
-    data['event_date'] = res['event_date']
-    data['event_time'] = res['event_time']
+    data['event_id'] = res['EventId']
+    data['event_date'] = res['EventDate']
+    data['event_time'] = res['EventTime']
     data['EventInSiteURL'] = res['EventInSiteURL']
     data['event_data'] = res
-    
+
 def stream_data():
     import json
     from kafka import KafkaProducer
@@ -48,7 +48,7 @@ def stream_data():
     import logging
 
 
-    producer = KafkaProducer(bootstrap_servers=['broker:9092'], max_block_ms=6000, api_version=(1, 0, 0))
+    producer = KafkaProducer(bootstrap_servers=['broker:29092'], max_block_ms=6000, api_version=(1, 0, 0))
     curr_time = time.time()
 
     while True:

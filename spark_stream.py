@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime
 
-from cassandra.auth import PlainTextAuthProvider
 from cassandra.cluster import Cluster
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, from_json
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 
 def create_keyspace(session):
