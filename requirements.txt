@@ -1,0 +1,4 @@
+cdp_scrapers==0.8.1
+kafka-python==2.0.2
+virtualenv==20.25.1
+unidecode==1.2.0
