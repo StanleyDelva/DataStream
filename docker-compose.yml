@@ -111,11 +111,7 @@ services:
     platform: linux/amd64
     image: apache/airflow:2.6.0-python3.9
     command: webserver
-<<<<<<< HEAD
     entrypoint: /opt/airflow/script/entrypoint.sh
-=======
-    entrypoint: [ '/opt/airflow/scripts/entrypoint.sh' ]
->>>>>>> e5f56a600c2949d4bab10b9c9c63b11d580f1307
     depends_on:
       - postgres
     environment:
