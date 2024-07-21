@@ -1,4 +1,4 @@
-import os
+import uuid
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -31,15 +31,26 @@ def get_data():
     #    outfile.write(fulton_event)
 
     #return fulton_event
-    return fulton_legistar_events[0]
+    #print(fulton_legistar_events[0])
+    return fulton_legistar_events
 
 def format_data(res):
+
     data = {}
+    data['id'] = str(uuid.uuid4())
     data['event_id'] = res['EventId']
     data['event_date'] = res['EventDate']
     data['event_time'] = res['EventTime']
-    data['EventInSiteURL'] = res['EventInSiteURL']
+    data['event_in_site_url'] = res['EventInSiteURL']
+
+    # turn json content into string of bytes and store
+    #res_bytes = res.encode('utf-8')
     data['event_data'] = res
+
+    #with open("sampleData1.json", "w") as outfile:
+    #    outfile.write(json.dumps(data, indent=2))
+
+    return data
 
 def stream_data():
     import json
@@ -47,26 +58,26 @@ def stream_data():
     import time
     import logging
 
+    res = get_data()
 
-    producer = KafkaProducer(bootstrap_servers=['broker:29092'], max_block_ms=6000, api_version=(1, 0, 0))
-    curr_time = time.time()
+    producer = KafkaProducer(bootstrap_servers=['broker:29092'], max_block_ms=300000, compression_type='lz4', 
+                             acks=1, max_request_size=2000000, metadata_max_age_ms=600000,api_version=(1, 0, 0))
 
-    while True:
-        if time.time() > curr_time + 300: # 3 minutes
-            break
-        try:
-            res = get_data()
-            res = format_data(res)
+    try:
+        # Find and send all meetings in response
+        for x in range(len(res)):
+            meeting_message = format_data(res[x])
 
-            producer.send('board_of_commission_events', json.dumps(res).encode('utf-8')) 
-        except Exception as e:
-            logging.error(f"An error occurred: {e}")
-            continue
+            logging.basicConfig(level=logging.DEBUG)
+            producer.send('board_of_commission_events', json.dumps(meeting_message).encode('utf-8'))
+            print("\n\nMESSAGE SENT\n\n") 
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        
             
 
 
-with DAG(
-    "BoC_automation",
+with DAG("BoC_automation",
     default_args=default_args,
     schedule="@daily",
     catchup=False,
@@ -76,6 +87,3 @@ with DAG(
         task_id="stream_data_from_api", 
         python_callable=stream_data
     )
-
-
-stream_data()

@@ -8,31 +8,44 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 
 def create_keyspace(session):
-    session.execute("""CREATE KEYSPACE IF NOT EXISTS legistar_spark_streams 
-                    WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1}""")
+    session.execute("""
+                    CREATE KEYSPACE IF NOT EXISTS legistar_spark_streams 
+                    WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1};
+                    """)
     
     print("Keyspace created successfully")
 
+
+
 def create_table(session):
-    session.execute("""CREATE TABLE IF NOT EXISTS legistar_spark_streams.legistar_events (
-                    event_id int PRIMARY KEY,
+    session.execute("""
+                    CREATE TABLE IF NOT EXISTS legistar_spark_streams.legistar_events (
+                    id text PRIMARY KEY,
+                    event_id int,
                     event_date text,
                     event_time text,
-                    EventInSiteURL text,
+                    event_in_site_url text,
                     event_data text
-                    )""")
+                    );
+                    """)
+    
+    print("Table created successfully")
 
 def insert_data(session, **kwargs):
     #insert data into cassandra
+    print(f"\n\nKWARGS SHIT: {kwargs}\n\n")
+
+    id = kwargs.get('id')
     event_id = kwargs.get('event_id')
     event_date = kwargs.get('event_date')
     event_time = kwargs.get('event_time')
-    EventInSiteURL = kwargs.get('EventInSiteURL')
+    event_url = kwargs.get('event_in_site_url')
+    
     event_data = kwargs.get('event_data')
 
     try:
-        session.execute(f"""INSERT INTO legistar_spark_streams.legistar_events (event_id, event_date, event_time, EventInSiteURL, event_data)
-                        VALUES ({event_id}, '{event_date}', '{event_time}', '{EventInSiteURL}', '{event_data}')""")
+        session.execute(f"""INSERT INTO legistar_spark_streams.legistar_events (event_id, event_date, event_time, event_in_site_url, event_data)
+                        VALUES ({event_id}, '{event_date}', '{event_time}', '{event_url}', '{event_data}')""")
     except Exception as e:
         logging.error(f"Couldn't insert data into cassandra due to exception: {e}")
 
@@ -44,10 +57,11 @@ def create_spark_connection():
     try:
         s_conn = SparkSession.builder \
             .appName("SparkDataStreaming") \
-            .config('spark.jars.packages', 'com.datastax.spark:spark-cassandra-connector_2.12:3.5.1', 
-                    'org.apache.spark:spark-sql-kafka-0-10_2.13:3.5.1') \
-            .config('spark.cassandra.connection.host', 'broker') \
+            .config('spark.jars.packages', "com.datastax.spark:spark-cassandra-connector_2.12:3.5.1,"
+                                           "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1") \
+            .config('spark.cassandra.connection.host', 'localhost') \
             .getOrCreate()
+        
         s_conn.sparkContext.setLogLevel("ERROR")
         logging.info("Spark session created successfully")
     except Exception as e:
@@ -60,7 +74,7 @@ def connect_to_kafka(spark_conn):
     try:
         spark_df = spark_conn.readStream \
             .format("kafka") \
-            .option("kafka.bootstrap.servers", "broker:9092") \
+            .option("kafka.bootstrap.servers", "localhost:9092") \
             .option("subscribe", "board_of_commission_events") \
             .option("startingOffsets", "earliest") \
             .load()
@@ -72,8 +86,6 @@ def connect_to_kafka(spark_conn):
 
 def create_cassandra_connection():
     #connect to cassandra cluster
-    session = None
-
     try:
         cluster = Cluster(['localhost'])
 
@@ -87,10 +99,11 @@ def create_cassandra_connection():
 def create_selection_df_from_kafka(spark_df):
     #create selection dataframe from kafka dataframe
     schema = StructType([
+        StructField("id", StringType(), False),
         StructField("event_id", IntegerType(), False),
         StructField("event_date", StringType(), False),
         StructField("event_time", StringType(), False),
-        StructField("EventInSiteURL", StringType(), False),
+        StructField("event_in_site_url", StringType(), False),
         StructField("event_data", StringType(), False)
 
     ])
@@ -115,13 +128,14 @@ if __name__ == "__main__":
             # do nothing
             create_keyspace(session)
             create_table(session)
+
+            logging.info("Streaming is being started...")
             # insert_data(session)
-            streaming_query = (selection_df.writeStream.format("org.apache.spark.cassandra")\
+            streaming_query = (selection_df.writeStream.format("org.apache.spark.sql.cassandra")\
                 .option('checkpointLocation', '/tmp/checkpoint')\
                 .option('keyspace', 'legistar_spark_streams')\
                 .option('table', 'legistar_events')\
                 .start())
             
             streaming_query.awaitTermination()
-            
-
+    
