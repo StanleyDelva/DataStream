@@ -22,10 +22,9 @@ def create_table(session):
                     CREATE TABLE IF NOT EXISTS legistar_spark_streams.legistar_events (
                     id text PRIMARY KEY,
                     event_id int,
-                    event_date text,
-                    event_time text,
-                    event_in_site_url text,
-                    event_data text
+                    event_item_title text,
+                    event_item_modified text,
+                    event_item_sequence text
                     );
                     """)
     
@@ -37,15 +36,14 @@ def insert_data(session, **kwargs):
 
     id = kwargs.get('id')
     event_id = kwargs.get('event_id')
-    event_date = kwargs.get('event_date')
-    event_time = kwargs.get('event_time')
-    event_url = kwargs.get('event_in_site_url')
+    event_item_title = kwargs.get('event_item_title')
+    event_item_modified = kwargs.get('event_item_modified')
+    event_item_sequence = kwargs.get('event_item_sequence')
     
-    event_data = kwargs.get('event_data')
 
     try:
-        session.execute(f"""INSERT INTO legistar_spark_streams.legistar_events (event_id, event_date, event_time, event_in_site_url, event_data)
-                        VALUES ({event_id}, '{event_date}', '{event_time}', '{event_url}', '{event_data}')""")
+        session.execute(f"""INSERT INTO legistar_spark_streams.legistar_events (event_id, event_item_title, event_item_modified, event_item_sequence)
+                        VALUES ({event_id}, '{event_item_title}', '{event_item_modified}', '{event_item_sequence}')""")
     except Exception as e:
         logging.error(f"Couldn't insert data into cassandra due to exception: {e}")
 
@@ -75,7 +73,7 @@ def connect_to_kafka(spark_conn):
         spark_df = spark_conn.readStream \
             .format("kafka") \
             .option("kafka.bootstrap.servers", "localhost:9092") \
-            .option("subscribe", "board_of_commission_events") \
+            .option("subscribe", "board_of_commission_event_items") \
             .option("startingOffsets", "earliest") \
             .load()
         logging.info("kafka dataframe created successfully")
@@ -101,10 +99,9 @@ def create_selection_df_from_kafka(spark_df):
     schema = StructType([
         StructField("id", StringType(), False),
         StructField("event_id", IntegerType(), False),
-        StructField("event_date", StringType(), False),
-        StructField("event_time", StringType(), False),
-        StructField("event_in_site_url", StringType(), False),
-        StructField("event_data", StringType(), False)
+        StructField("event_item_title", StringType(), False),
+        StructField("event_item_modified", StringType(), False),
+        StructField("event_item_sequence", StringType(), False)
 
     ])
 

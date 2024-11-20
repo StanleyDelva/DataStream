@@ -16,7 +16,7 @@ def get_data():
     # Get legistar events from beginning of month to current date
     fulton_legistar_events = get_legistar_events_for_timespan(
     client="fulton",
-    begin=datetime(2024, datetime.now().month, 10),
+    begin=datetime(2024, datetime.now().month, 1),
     end=datetime(2024, datetime.now().month, datetime.now().day),
     # datetime.now().day
     )
@@ -38,14 +38,15 @@ def format_data(res):
 
     data = {}
     data['id'] = str(uuid.uuid4())
-    data['event_id'] = res['EventId']
-    data['event_date'] = res['EventDate']
-    data['event_time'] = res['EventTime']
-    data['event_in_site_url'] = res['EventInSiteURL']
-
+    data['event_id'] = res['EventItemEventId']
+    data['event_item_title'] = res['EventItemTitle']
+    data['event_item_modified'] = res['EventItemLastModifiedUtc']
+    data['event_item_sequence'] = res['EventItemAgendaSequence']
+    #data['event_time'] = res['EventTime']
+    #data['event_in_site_url'] = res['EventInSiteURL']
     # turn json content into string of bytes and store
     #res_bytes = res.encode('utf-8')
-    data['event_data'] = res
+    #data['event_items'] = res['EventItems']
 
     #with open("sampleData1.json", "w") as outfile:
     #    outfile.write(json.dumps(data, indent=2))
@@ -66,11 +67,27 @@ def stream_data():
     try:
         # Find and send all meetings in response
         for x in range(len(res)):
-            meeting_message = format_data(res[x])
+            #send event data to event topic
+            event = {}
 
-            logging.basicConfig(level=logging.DEBUG)
-            producer.send('board_of_commission_events', json.dumps(meeting_message).encode('utf-8'))
-            print("\n\nMESSAGE SENT\n\n") 
+            event['id'] = str(uuid.uuid4())
+            event['event_id'] = res[x]['EventId']
+            event['last_modified'] = res[x]['EventLastModifiedUtc']
+            event['body_name'] = res[x]['EventBodyName']
+            event['event_date'] = res[x]['EventDate']
+            event['event_time'] = res[x]['EventTime']
+            event['event_agenda'] = res[x]['EventAgendaFile']
+            event['event_in_site_url'] = res[x]['EventInSiteURL']
+            producer.send('BoC_events', json.dumps(event).encode('utf-8'))
+
+
+            for event_item in res[x]['EventItems']:
+                #send each event item to event item topic
+                meeting_message = format_data(event_item)
+
+                logging.basicConfig(level=logging.DEBUG)
+                producer.send('board_of_commission_event_items', json.dumps(meeting_message).encode('utf-8'))
+                print("\n\nMESSAGE SENT\n\n") 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
         
